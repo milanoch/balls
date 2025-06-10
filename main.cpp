@@ -1,6 +1,8 @@
 #include <iostream>
 #include <raylib.h>
 #include <vector>
+#include <cstdlib>
+#include <ctime>
 
 enum FigureType {
     CIRCLE,
@@ -9,41 +11,58 @@ enum FigureType {
 };
 
 int main() {
+    std::srand(std::time(nullptr));
     FigureType state = FigureType::CIRCLE;
-    srand(time(nullptr));
 
     const int screenWidth = 800;
     const int screenHeight = 450;
     InitWindow(screenWidth, screenHeight, ".");
 
     SetTargetFPS(60);
-    std::vector<Vector2> circles;
-    std::vector<Vector2> triangles;
-    std::vector<Vector2> squares;
+
+    std::vector<Vector2> circlespos;
+    std::vector<Color> circlescolor;
+    std::vector<int> circlessize;
+
+    std::vector<Vector2> trianglespos;
+    std::vector<Color> trianglescolor;
+    std::vector<Vector2> trianglessize;
+
+    std::vector<Vector2> squarespos;
+    std::vector<Color> squarescolor;
+    std::vector<Vector2> squaressize;
+
     float drawDelay = 0.f;
     while (!WindowShouldClose()) {
         BeginDrawing();
         drawDelay -= GetFrameTime();
-        if (IsMouseButtonDown(0) && drawDelay <= 0.f) {
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && drawDelay <= 0.f) {
             Vector2 pos = GetMousePosition();
             if (state == FigureType::CIRCLE) {
-                circles.push_back(pos);
+                circlespos.push_back(pos);
+                circlescolor.push_back({
+                    static_cast<unsigned char>(rand() % 256),
+                    static_cast<unsigned char>(rand() % 256),
+                    static_cast<unsigned char>(rand() % 256),
+                    255
+                });
+                circlessize.push_back(static_cast<unsigned char>(rand() % 30));
                 state = FigureType::TRIANGLE;
             } else if (state == FigureType::TRIANGLE) {
-                triangles.push_back(pos);
+                trianglespos.push_back(pos);
                 state = FigureType::SQUARE;
             } else if (state == FigureType::SQUARE) {
-                squares.push_back(pos);
+                squarespos.push_back(pos);
                 state = FigureType::CIRCLE;
             }
-            drawDelay = 0.2f;
+            drawDelay = 0.02f;
         }
-        for (int i = 0; i < circles.size(); i++) {
-            Vector2 pos = circles[i];
-            DrawCircle(pos.x, pos.y, 5.f, RED);
+        for (int i = 0; i < circlespos.size(); i++) {
+            Vector2 pos = circlespos[i];
+            DrawCircle(pos.x, pos.y, circlessize[i],circlescolor[i]);
         }
-        for (int i = 0; i < triangles.size(); i++) {
-            Vector2 pos = triangles[i];
+        for (int i = 0; i < trianglespos.size(); i++) {
+            Vector2 pos = trianglespos[i];
             Vector2 a;
             a.x = pos.x;
             a.y = pos.y - 10;
@@ -58,8 +77,8 @@ int main() {
 
             DrawTriangle(a, b, c, RED);
         }
-        for (int i = 0; i < squares.size(); i++) {
-            Vector2 pos = squares[i];
+        for (int i = 0; i < squarespos.size(); i++) {
+            Vector2 pos = squarespos[i];
             DrawRectangle(pos.x, pos.y, 5, 5, RED);
         }
         DrawFPS(50, 50);
