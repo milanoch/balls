@@ -63,6 +63,16 @@ int main() {
                 });
                 state = FigureType::SQUARE;
             } else if (state == FigureType::SQUARE) {
+                squaressize.push_back({
+                    static_cast<float>(rand() % 20),
+                    static_cast<float>(rand() % 20)
+                });
+                squarescolor.push_back({
+                    static_cast<unsigned char>(rand() % 256),
+                    static_cast<unsigned char>(rand() % 256),
+                    static_cast<unsigned char>(rand() % 256),
+                    255
+                });
                 squarespos.push_back(pos);
                 state = FigureType::CIRCLE;
             }
@@ -91,7 +101,7 @@ int main() {
         }
         for (int i = 0; i < squarespos.size(); i++) {
             Vector2 pos = squarespos[i];
-            DrawRectangle(pos.x, pos.y, 5, 5, RED);
+            DrawRectangle(pos.x, pos.y, squaressize[i].x, squaressize[i].y, squarescolor[i]);
         }
         DrawFPS(50, 50);
         ClearBackground(BLACK);
