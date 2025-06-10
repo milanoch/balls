@@ -36,6 +36,7 @@ int main() {
     while (!WindowShouldClose()) {
         BeginDrawing();
         drawDelay -= GetFrameTime();
+
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && drawDelay <= 0.f) {
             Vector2 pos = GetMousePosition();
             if (state == FigureType::CIRCLE) {
@@ -46,10 +47,20 @@ int main() {
                     static_cast<unsigned char>(rand() % 256),
                     255
                 });
-                circlessize.push_back(static_cast<unsigned char>(rand() % 30));
+                circlessize.push_back(rand() % 30);
                 state = FigureType::TRIANGLE;
             } else if (state == FigureType::TRIANGLE) {
                 trianglespos.push_back(pos);
+                trianglescolor.push_back({
+                    static_cast<unsigned char>(rand() % 256),
+                    static_cast<unsigned char>(rand() % 256),
+                    static_cast<unsigned char>(rand() % 256),
+                    255
+                });
+                trianglessize.push_back({
+                    static_cast<float>(rand() % 10),
+                    static_cast<float>(rand() % 10)
+                });
                 state = FigureType::SQUARE;
             } else if (state == FigureType::SQUARE) {
                 squarespos.push_back(pos);
@@ -57,25 +68,26 @@ int main() {
             }
             drawDelay = 0.02f;
         }
+
         for (int i = 0; i < circlespos.size(); i++) {
             Vector2 pos = circlespos[i];
             DrawCircle(pos.x, pos.y, circlessize[i],circlescolor[i]);
         }
         for (int i = 0; i < trianglespos.size(); i++) {
-            Vector2 pos = trianglespos[i];
+
             Vector2 a;
-            a.x = pos.x;
-            a.y = pos.y - 10;
+            a.x = trianglespos[i].x;
+            a.y = trianglespos[i].y - 10;
 
             Vector2 b;
-            b.x = pos.x - 10;
-            b.y = pos.y + 10;
+            b.x = trianglespos[i].x - trianglessize[i].x;
+            b.y = trianglespos[i].y + trianglessize[i].y;
 
             Vector2 c;
-            c.x = pos.x + 10;
-            c.y = pos.y + 10;
+            c.x = trianglespos[i].x + trianglessize[i].x;
+            c.y = trianglespos[i].y + trianglessize[i].y;
 
-            DrawTriangle(a, b, c, RED);
+            DrawTriangle(a, b, c,trianglescolor[i]);
         }
         for (int i = 0; i < squarespos.size(); i++) {
             Vector2 pos = squarespos[i];
