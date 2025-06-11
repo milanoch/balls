@@ -48,6 +48,11 @@ int main() {
                     255
                 });
                 circlessize.push_back(rand() % 30);
+                if(circlessize.size() >= 100){
+                    circlessize.erase(circlessize.begin());
+                    circlescolor.erase(circlescolor.begin());
+                    circlespos.erase(circlespos.begin());
+                }
                 state = FigureType::TRIANGLE;
             } else if (state == FigureType::TRIANGLE) {
                 trianglespos.push_back(pos);
@@ -61,6 +66,11 @@ int main() {
                     static_cast<float>(rand() % 10),
                     static_cast<float>(rand() % 10)
                 });
+                if(trianglessize.size() >= 100){
+                    trianglessize.erase(trianglessize.begin());
+                    trianglespos.erase(trianglespos.begin());
+                    trianglescolor.erase(trianglescolor.begin());
+                }
                 state = FigureType::SQUARE;
             } else if (state == FigureType::SQUARE) {
                 squaressize.push_back({
@@ -74,6 +84,11 @@ int main() {
                     255
                 });
                 squarespos.push_back(pos);
+                if(squaressize.size() >= 100){
+                    squaressize.erase(squaressize.begin());
+                    squarespos.erase(squarespos.begin());
+                    squarescolor.erase(squarescolor.begin());
+                }
                 state = FigureType::CIRCLE;
             }
             drawDelay = 0.02f;
@@ -84,7 +99,6 @@ int main() {
             DrawCircle(pos.x, pos.y, circlessize[i],circlescolor[i]);
         }
         for (int i = 0; i < trianglespos.size(); i++) {
-
             Vector2 a;
             a.x = trianglespos[i].x;
             a.y = trianglespos[i].y - 10;
