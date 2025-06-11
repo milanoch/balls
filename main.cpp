@@ -10,116 +10,151 @@ enum FigureType {
     SQUARE,
 };
 
+class Figure {
+public:
+    virtual ~Figure() = default;
+    virtual void update() = 0;
+};
+
+class RectangleFigure : public Figure {
+public:
+    RectangleFigure(Vector2 _pos) {
+        velocity = {(rand() % 100 - 50.f), (rand() % 100 - 50.f)};
+        size = {
+                static_cast<float>(rand() % 20),
+                static_cast<float>(rand() % 20)
+        };
+        color = {
+                static_cast<unsigned char>(rand() % 256),
+                static_cast<unsigned char>(rand() % 256),
+                static_cast<unsigned char>(rand() % 256),
+                255
+        };
+        pos = _pos;
+    }
+
+    void update() override {
+        pos.x += velocity.x * GetFrameTime();
+        pos.y += velocity.y * GetFrameTime();
+        DrawRectangle(pos.x, pos.y, size.x, size.y, color);
+    }
+
+    Vector2 velocity;
+    Vector2 pos;
+    Color color;
+    Vector2 size;
+};
+
+class TriangleFigure : public Figure {
+public:
+    TriangleFigure(Vector2 _pos) {
+        velocity = {(rand() % 100 - 50.f), (rand() % 100 - 50.f)};
+        pos = _pos;
+        color = {
+                static_cast<unsigned char>(rand() % 256),
+                static_cast<unsigned char>(rand() % 256),
+                static_cast<unsigned char>(rand() % 256),
+                255
+        };
+        size = {
+                static_cast<float>(rand() % 10),
+                static_cast<float>(rand() % 10)
+        };
+    }
+
+    void update() override {
+        pos.x += velocity.x * GetFrameTime();
+        pos.y += velocity.y * GetFrameTime();
+
+        Vector2 a;
+        a.x = pos.x;
+        a.y = pos.y - 10;
+
+        Vector2 b;
+        b.x = pos.x - size.x;
+        b.y = pos.y + size.y;
+
+        Vector2 c;
+        c.x = pos.x + size.x;
+        c.y = pos.y + size.y;
+
+        DrawTriangle(a, b, c, color);
+    }
+
+    Vector2 velocity;
+    Vector2 pos;
+    Color color;
+    Vector2 size;
+};
+
+class CircleFigure : public Figure {
+public:
+    CircleFigure(Vector2 _pos) {
+        velocity = {(rand() % 100 - 50.f), (rand() % 100 - 50.f)};
+        pos = _pos;
+        color = {
+                static_cast<unsigned char>(rand() % 256),
+                static_cast<unsigned char>(rand() % 256),
+                static_cast<unsigned char>(rand() % 256),
+                255
+        };
+        size = rand() % 30;
+    }
+
+    void update() override {
+        pos.x += velocity.x * GetFrameTime();
+        pos.y += velocity.y * GetFrameTime();
+        DrawCircle(pos.x, pos.y, size, color);
+    }
+
+    Vector2 velocity;
+    Vector2 pos;
+    Color color;
+    int size;
+};
+
 int main() {
+    const int MAX_FIGURES = 100;
     std::srand(std::time(nullptr));
     FigureType state = FigureType::CIRCLE;
-
     const int screenWidth = 800;
     const int screenHeight = 450;
     InitWindow(screenWidth, screenHeight, ".");
-
     SetTargetFPS(60);
-
-    std::vector<Vector2> circlespos;
-    std::vector<Color> circlescolor;
-    std::vector<int> circlessize;
-
-    std::vector<Vector2> trianglespos;
-    std::vector<Color> trianglescolor;
-    std::vector<Vector2> trianglessize;
-
-    std::vector<Vector2> squarespos;
-    std::vector<Color> squarescolor;
-    std::vector<Vector2> squaressize;
-
+    std::vector<Figure *> figures;
     float drawDelay = 0.f;
+    // MAIN LOOP BEGIN
     while (!WindowShouldClose()) {
         BeginDrawing();
         drawDelay -= GetFrameTime();
-
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && drawDelay <= 0.f) {
             Vector2 pos = GetMousePosition();
             if (state == FigureType::CIRCLE) {
-                circlespos.push_back(pos);
-                circlescolor.push_back({
-                    static_cast<unsigned char>(rand() % 256),
-                    static_cast<unsigned char>(rand() % 256),
-                    static_cast<unsigned char>(rand() % 256),
-                    255
-                });
-                circlessize.push_back(rand() % 30);
-                if(circlessize.size() >= 100){
-                    circlessize.erase(circlessize.begin());
-                    circlescolor.erase(circlescolor.begin());
-                    circlespos.erase(circlespos.begin());
-                }
+                figures.push_back(new CircleFigure(pos));
                 state = FigureType::TRIANGLE;
             } else if (state == FigureType::TRIANGLE) {
-                trianglespos.push_back(pos);
-                trianglescolor.push_back({
-                    static_cast<unsigned char>(rand() % 256),
-                    static_cast<unsigned char>(rand() % 256),
-                    static_cast<unsigned char>(rand() % 256),
-                    255
-                });
-                trianglessize.push_back({
-                    static_cast<float>(rand() % 10),
-                    static_cast<float>(rand() % 10)
-                });
-                if(trianglessize.size() >= 100){
-                    trianglessize.erase(trianglessize.begin());
-                    trianglespos.erase(trianglespos.begin());
-                    trianglescolor.erase(trianglescolor.begin());
-                }
+                figures.push_back(new TriangleFigure(pos));
                 state = FigureType::SQUARE;
             } else if (state == FigureType::SQUARE) {
-                squaressize.push_back({
-                    static_cast<float>(rand() % 20),
-                    static_cast<float>(rand() % 20)
-                });
-                squarescolor.push_back({
-                    static_cast<unsigned char>(rand() % 256),
-                    static_cast<unsigned char>(rand() % 256),
-                    static_cast<unsigned char>(rand() % 256),
-                    255
-                });
-                squarespos.push_back(pos);
-                if(squaressize.size() >= 100){
-                    squaressize.erase(squaressize.begin());
-                    squarespos.erase(squarespos.begin());
-                    squarescolor.erase(squarescolor.begin());
-                }
+                figures.push_back(new RectangleFigure(pos));
                 state = FigureType::CIRCLE;
+            }
+            if (figures.size() >= MAX_FIGURES) {
+                delete figures[0];
+                figures.erase(figures.begin());
             }
             drawDelay = 0.02f;
         }
-
-        for (int i = 0; i < circlespos.size(); i++) {
-            Vector2 pos = circlespos[i];
-            DrawCircle(pos.x, pos.y, circlessize[i],circlescolor[i]);
-        }
-        for (int i = 0; i < trianglespos.size(); i++) {
-            Vector2 a;
-            a.x = trianglespos[i].x;
-            a.y = trianglespos[i].y - 10;
-
-            Vector2 b;
-            b.x = trianglespos[i].x - trianglessize[i].x;
-            b.y = trianglespos[i].y + trianglessize[i].y;
-
-            Vector2 c;
-            c.x = trianglespos[i].x + trianglessize[i].x;
-            c.y = trianglespos[i].y + trianglessize[i].y;
-
-            DrawTriangle(a, b, c,trianglescolor[i]);
-        }
-        for (int i = 0; i < squarespos.size(); i++) {
-            Vector2 pos = squarespos[i];
-            DrawRectangle(pos.x, pos.y, squaressize[i].x, squaressize[i].y, squarescolor[i]);
+        for (Figure *figure: figures) {
+            figure->update();
         }
         DrawFPS(50, 50);
         ClearBackground(BLACK);
         EndDrawing();
+    }
+    // MAIN LOOP END
+    for (Figure *figure: figures) {
+        delete figure;
     }
     CloseWindow();
     return 0;
